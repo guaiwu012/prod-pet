@@ -3,9 +3,10 @@ import { navItems, type AppRoute } from "../app/routes";
 interface SidebarProps {
   activeRoute: AppRoute;
   onNavigate: (route: AppRoute) => void;
+  onOpenDemo?: () => void;
 }
 
-export function Sidebar({ activeRoute, onNavigate }: SidebarProps) {
+export function Sidebar({ activeRoute, onNavigate, onOpenDemo }: SidebarProps) {
   return (
     <aside className="sidebar">
       <button className="brand" onClick={() => onNavigate("dashboard")}>
@@ -30,8 +31,9 @@ export function Sidebar({ activeRoute, onNavigate }: SidebarProps) {
       </nav>
 
       <div className="sidebar-note">
-        <span>本地模式</span>
+        <span>{onOpenDemo ? "Web 演示模式" : "本地模式"}</span>
         <p>数据只保存在这台设备上。</p>
+        {onOpenDemo && <button onClick={onOpenDemo}>返回作品介绍</button>}
       </div>
     </aside>
   );

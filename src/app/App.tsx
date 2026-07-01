@@ -10,13 +10,22 @@ import { DashboardPage } from "../pages/DashboardPage";
 import { HealthSettingsPage } from "../pages/HealthSettingsPage";
 import { PetDesignPage } from "../pages/PetDesignPage";
 import { WeeklyReportPage } from "../pages/WeeklyReportPage";
+import { WebDemoPage } from "../pages/WebDemoPage";
+import { buildDemoData } from "../storage/demoData";
 import { loadAppData, saveAppData } from "../storage/storage";
 import type { AppData } from "../types";
 import type { AppRoute } from "./routes";
 
 export function App() {
-  const [data, setData] = useState<AppData>(() => loadAppData());
+  const webMode = !isTauri();
+  const [data, setData] = useState<AppData>(() => {
+    const stored = loadAppData();
+    return webMode && !stored.colleagues.length && !stored.communicationLogs.length
+      ? buildDemoData()
+      : stored;
+  });
   const [route, setRoute] = useState<AppRoute>("dashboard");
+  const [showWebDemo, setShowWebDemo] = useState(webMode);
 
   useEffect(() => {
     if (!isTauri()) return undefined;
@@ -60,9 +69,18 @@ export function App() {
     }
   }, [data, route]);
 
+  const openWorkspace = (nextRoute: AppRoute = "dashboard") => {
+    setRoute(nextRoute);
+    setShowWebDemo(false);
+  };
+
+  if (showWebDemo) {
+    return <WebDemoPage onOpenWorkspace={openWorkspace} />;
+  }
+
   return (
     <div className="app-layout">
-      <Sidebar activeRoute={route} onNavigate={setRoute} />
+      <Sidebar activeRoute={route} onNavigate={setRoute} onOpenDemo={webMode ? () => setShowWebDemo(true) : undefined} />
       <main className="page-shell">{page}</main>
     </div>
   );
